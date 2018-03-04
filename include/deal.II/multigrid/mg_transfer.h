@@ -24,6 +24,10 @@
 #include <deal.II/lac/block_sparsity_pattern.h>
 #include <deal.II/lac/trilinos_sparse_matrix.h>
 #include <deal.II/lac/la_parallel_vector.h>
+#include <deal.II/lac/petsc_parallel_vector.h>
+#include <deal.II/lac/petsc_parallel_sparse_matrix.h>
+
+#include <deal.II/lac/sparsity_tools.h>
 
 #include <deal.II/lac/vector_memory.h>
 
@@ -123,6 +127,47 @@ namespace internal
     }
   };
 
+#endif
+
+#ifdef DEAL_II_WITH_PETSC
+  template <>
+  struct MatrixSelector<dealii::PETScWrappers::MPI::Vector>
+  {
+    typedef ::dealii::DynamicSparsityPattern Sparsity;
+    typedef ::dealii::PETScWrappers::MPI::SparseMatrix Matrix;
+
+    // Since PETSc matrices do not offer the functionality to fill up incomplete sparsity patterns on their own, the sparsity pattern must be manually distributed
+    // This only works if the row index set is known, which can be extracted from a DynamicSparsityPattern but not the other types
+    // The support of MatrixSelectore is therefore limited to that type for PETSc
+    template <typename DoFHandlerType>
+    static void reinit(Matrix &matrix, Sparsity &, int level, const dealii::DynamicSparsityPattern &sp, DoFHandlerType &dh)
+    {
+      // Copy sparsity pattern into temporary local
+      ::dealii::DynamicSparsityPattern dsp(sp);
+      
+      // Compute # of locally owned MG dofs / processor for distribution
+      const std::vector<::dealii::IndexSet>& locally_owned_mg_dofs_per_processor = dh.locally_owned_mg_dofs_per_processor(level+1);
+      const std::vector<::dealii::types::global_dof_index> n_locally_owned_mg_dofs_per_processor(locally_owned_mg_dofs_per_processor.size(), 0);
+      
+      for(size_t index = 0; index < n_locally_owned_mg_dofs_per_processor.size(): ++index) {
+          n_locally_owned_mg_dofs_per_processor[index] = locally_owned_mg_dofs_per_processor.n_elements();
+      }
+      
+      // Distribute sparsity pattern
+      ::dealii::SparsityTools::distribute_sparsity_pattern(
+        dsp,
+        n_locally_owned_mg_dofs_per_processor,
+        MPI_COMM_WORLD,
+        dsp.row_index_set()
+      );
+      
+      // Reinit PETSc matrix
+      matrix.reinit(dh.locally_owned_mg_dofs(level+1),
+                    dh.locally_owned_mg_dofs(level),
+                    dsp, MPI_COMM_WORLD);
+    }
+
+  };
 #endif
 }
 

@@ -147,7 +147,7 @@ namespace internal
       
       // Compute # of locally owned MG dofs / processor for distribution
       const std::vector<::dealii::IndexSet>& locally_owned_mg_dofs_per_processor = dh.locally_owned_mg_dofs_per_processor(level+1);
-      const std::vector<::dealii::types::global_dof_index> n_locally_owned_mg_dofs_per_processor(locally_owned_mg_dofs_per_processor.size(), 0);
+      std::vector<::dealii::types::global_dof_index> n_locally_owned_mg_dofs_per_processor(locally_owned_mg_dofs_per_processor.size(), 0);
       
       for(size_t index = 0; index < n_locally_owned_mg_dofs_per_processor.size(); ++index) {
           n_locally_owned_mg_dofs_per_processor[index] = locally_owned_mg_dofs_per_processor[index].n_elements();

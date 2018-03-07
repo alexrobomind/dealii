@@ -52,7 +52,7 @@ namespace internal
     typedef ::dealii::SparseMatrix<typename VectorType::value_type> Matrix;
 
     template <typename SparsityPatternType, typename DoFHandlerType>
-    static void reinit(Matrix &matrix, Sparsity &sparsity, int level, const SparsityPatternType &sp, const DoFHandlerType &)
+    static void reinit(Matrix &matrix, Sparsity &sparsity, int level, SparsityPatternType &sp, const DoFHandlerType &)
     {
       sparsity.copy_from (sp);
       (void)level;
@@ -68,7 +68,7 @@ namespace internal
     typedef ::dealii::TrilinosWrappers::SparseMatrix Matrix;
 
     template <typename SparsityPatternType, typename DoFHandlerType>
-    static void reinit(Matrix &matrix, Sparsity &, int level, const SparsityPatternType &sp, DoFHandlerType &dh)
+    static void reinit(Matrix &matrix, Sparsity &, int level, SparsityPatternType &sp, DoFHandlerType &dh)
     {
       matrix.reinit(dh.locally_owned_mg_dofs(level+1),
                     dh.locally_owned_mg_dofs(level),
@@ -84,7 +84,7 @@ namespace internal
     typedef ::dealii::TrilinosWrappers::SparseMatrix Matrix;
 
     template <typename SparsityPatternType, typename DoFHandlerType>
-    static void reinit(Matrix &matrix, Sparsity &, int level, const SparsityPatternType &sp, DoFHandlerType &dh)
+    static void reinit(Matrix &matrix, Sparsity &, int level, SparsityPatternType &sp, DoFHandlerType &dh)
     {
       matrix.reinit(dh.locally_owned_mg_dofs(level+1),
                     dh.locally_owned_mg_dofs(level),
@@ -101,7 +101,7 @@ namespace internal
     typedef ::dealii::TrilinosWrappers::SparseMatrix Matrix;
 
     template <typename SparsityPatternType, typename DoFHandlerType>
-    static void reinit(Matrix &matrix, Sparsity &, int level, const SparsityPatternType &sp, DoFHandlerType &dh)
+    static void reinit(Matrix &matrix, Sparsity &, int level, SparsityPatternType &sp, DoFHandlerType &dh)
     {
       matrix.reinit(dh.locally_owned_mg_dofs(level+1),
                     dh.locally_owned_mg_dofs(level),
@@ -119,7 +119,7 @@ namespace internal
     typedef ::dealii::SparseMatrix<Number> Matrix;
 
     template <typename SparsityPatternType, typename DoFHandlerType>
-    static void reinit(Matrix &, Sparsity &, int, const SparsityPatternType &, const DoFHandlerType &)
+    static void reinit(Matrix &, Sparsity &, int, SparsityPatternType &, const DoFHandlerType &)
     {
       AssertThrow(false, ExcNotImplemented(
                     "ERROR: MGTransferPrebuilt with LinearAlgebra::distributed::Vector currently "
@@ -140,11 +140,8 @@ namespace internal
     // This only works if the row index set is known, which can be extracted from a DynamicSparsityPattern but not the other types
     // The support of MatrixSelectore is therefore limited to that type for PETSc
     template <typename DoFHandlerType>
-    static void reinit(Matrix &matrix, Sparsity &, int level, const dealii::DynamicSparsityPattern &sp, DoFHandlerType &dh)
-    {
-      // Copy sparsity pattern into temporary local
-      ::dealii::DynamicSparsityPattern dsp(sp);
-      
+    static void reinit(Matrix &matrix, Sparsity &, int level, dealii::DynamicSparsityPattern &sp, const DoFHandlerType &dh)
+    {      
       // Compute # of locally owned MG dofs / processor for distribution
       const std::vector<::dealii::IndexSet>& locally_owned_mg_dofs_per_processor = dh.locally_owned_mg_dofs_per_processor(level+1);
       std::vector<::dealii::types::global_dof_index> n_locally_owned_mg_dofs_per_processor(locally_owned_mg_dofs_per_processor.size(), 0);
@@ -155,16 +152,16 @@ namespace internal
       
       // Distribute sparsity pattern
       ::dealii::SparsityTools::distribute_sparsity_pattern(
-        dsp,
+        sp,
         n_locally_owned_mg_dofs_per_processor,
         MPI_COMM_WORLD,
-        dsp.row_index_set()
+        sp.row_index_set()
       );
       
       // Reinit PETSc matrix
       matrix.reinit(dh.locally_owned_mg_dofs(level+1),
                     dh.locally_owned_mg_dofs(level),
-                    dsp, MPI_COMM_WORLD);
+                    sp, MPI_COMM_WORLD);
     }
 
   };

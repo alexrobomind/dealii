@@ -31,6 +31,9 @@ template <typename Number> class ReadWriteVector;
 
 namespace LinearAlgebra
 {
+  /**
+   * A Namespace for the CUDA vectors.
+   */
   namespace CUDAWrappers
   {
     /**
@@ -39,7 +42,7 @@ namespace LinearAlgebra
      *
      * @note Only float and double are supported.
      *
-     * @ingroup CUDAWrappers
+     * @see CUDAWrappers
      * @ingroup Vectors
      * @author Karl Ljungkvist, Bruno Turcksin, 2016
      */
@@ -80,7 +83,7 @@ namespace LinearAlgebra
 
       /**
        * Reinit functionality. The flag <tt>omit_zeroing_entries</tt>
-       * determines wheter the vector should be filled with zero (false) or
+       * determines whether the vector should be filled with zero (false) or
        * left untouched (true).
        */
       void reinit(const size_type n,
@@ -168,7 +171,7 @@ namespace LinearAlgebra
       virtual void scale(const VectorSpaceVector<Number> &scaling_factors) override;
 
       /**
-       * Assignement <tt>*this = a*V</tt>.
+       * Assignment <tt>*this = a*V</tt>.
        */
       virtual void equ(const Number a, const VectorSpaceVector<Number> &V) override;
 

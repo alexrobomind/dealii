@@ -472,7 +472,7 @@ namespace PETScWrappers
       // have to count how many of the
       // entries in the sparsity pattern lie
       // in the column area we have locally,
-      // and how many arent. for this, we
+      // and how many aren't. for this, we
       // first have to know which areas are
       // ours
       size_type local_row_start = 0;
@@ -705,6 +705,28 @@ namespace PETScWrappers
       indices.compress();
 
       return indices;
+    }
+
+    void
+    SparseMatrix::mmult (SparseMatrix       &C,
+                         const SparseMatrix &B,
+                         const MPI::Vector  &V) const
+    {
+      // Simply forward to the protected member function of the base class
+      // that takes abstract matrix and vector arguments (to which the compiler
+      // automatically casts the arguments).
+      MatrixBase::mmult (C, B, V);
+    }
+
+    void
+    SparseMatrix::Tmmult (SparseMatrix       &C,
+                          const SparseMatrix &B,
+                          const MPI::Vector  &V) const
+    {
+      // Simply forward to the protected member function of the base class
+      // that takes abstract matrix and vector arguments (to which the compiler
+      // automatically casts the arguments).
+      MatrixBase::Tmmult (C, B, V);
     }
 
   }

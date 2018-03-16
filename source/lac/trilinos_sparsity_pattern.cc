@@ -143,12 +143,12 @@ namespace TrilinosWrappers
 
 
 
-  SparsityPattern::SparsityPattern (SparsityPattern &&other)
-    :
-    Subscriptor(std::move(other)),
-    column_space_map(std::move(other.column_space_map)),
-    graph(std::move(other.graph)),
-    nonlocal_graph(std::move(other.nonlocal_graph))
+  SparsityPattern::SparsityPattern (SparsityPattern &&other) noexcept
+:
+  Subscriptor(std::move(other)),
+              column_space_map(std::move(other.column_space_map)),
+              graph(std::move(other.graph)),
+              nonlocal_graph(std::move(other.nonlocal_graph))
   {}
 
 
@@ -1006,7 +1006,7 @@ namespace TrilinosWrappers
 
 
   // As of now, no particularly neat
-  // ouput is generated in case of
+  // output is generated in case of
   // multiple processors.
   void
   SparsityPattern::print (std::ostream &out,

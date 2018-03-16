@@ -194,7 +194,7 @@ LAPACKFullMatrix<number>::operator*= (const number factor)
   const types::blas_int m = this->m();
   const types::blas_int n = this->n();
   const types::blas_int lda = this->m();
-  types::blas_int info;
+  types::blas_int info = 0;
   // kl and ku will not be referenced for type = G (dense matrices).
   const types::blas_int kl=0;
   number *values = &this->values[0];
@@ -224,7 +224,7 @@ LAPACKFullMatrix<number>::operator/= (const number factor)
   const types::blas_int m = this->m();
   const types::blas_int n = this->n();
   const types::blas_int lda = this->m();
-  types::blas_int info;
+  types::blas_int info = 0;
   // kl and ku will not be referenced for type = G (dense matrices).
   const types::blas_int kl=0;
   number *values = &this->values[0];
@@ -1147,6 +1147,26 @@ LAPACKFullMatrix<number>::compute_inverse_svd(const double threshold)
     }
   state = LAPACKSupport::inverse_svd;
 }
+
+
+
+template <typename number>
+void
+LAPACKFullMatrix<number>::compute_inverse_svd_with_kernel(const unsigned int kernel_size)
+{
+  if (state == LAPACKSupport::matrix)
+    compute_svd();
+
+  Assert (state==LAPACKSupport::svd, ExcState(state));
+
+  const unsigned int n_wr = wr.size();
+  for (size_type i=0; i<n_wr-kernel_size; ++i)
+    wr[i] = number(1.)/wr[i];
+  for (size_type i=n_wr-kernel_size; i<n_wr; ++i)
+    wr[i] = 0.;
+  state = LAPACKSupport::inverse_svd;
+}
+
 
 
 template <typename number>

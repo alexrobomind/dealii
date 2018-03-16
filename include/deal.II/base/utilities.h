@@ -61,6 +61,13 @@ DEAL_II_NAMESPACE_OPEN
  */
 namespace Utilities
 {
+  /**
+   * Return a string of the form "deal.II version x.y.z" where "x.y.z"
+   * identifies the version of deal.II you are using. This information
+   * is also provided by the DEAL_II_PACKAGE_NAME and
+   * DEAL_II_PACKAGE_VERSION preprocessor variables.
+   */
+  std::string dealii_version_string ();
 
   /**
    * Convert a number @p value to a string, with as many digits as given to
@@ -454,7 +461,7 @@ namespace Utilities
    *  However, the converse does not:
    *  @code
    *    array = Utilities::unpack<double[3]>(buffer);
-   *  @code
+   *  @endcode
    *  This is because C++ does not allow functions to return arrays.
    *  Consequently, there is a separate unpack() function for arrays, see
    *  below.
@@ -482,12 +489,12 @@ namespace Utilities
    *  However, the converse does not:
    *  @code
    *    array = Utilities::unpack<double[3]>(buffer);
-   *  @code
+   *  @endcode
    *  This is because C++ does not allow functions to return arrays.
    *  The current function therefore allows to write
    *  @code
    *    Utilities::unpack(buffer, array);
-   *  @code
+   *  @endcode
    *  Note that unlike the other unpack() function, it is not necessary
    *  to explicitly specify the template arguments since they can be
    *  deduced from the second argument.

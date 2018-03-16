@@ -223,7 +223,7 @@ namespace numbers
      * general template is chosen for types not equal to std::complex, this
      * function simply returns the square of the given number.
      *
-     * @ingroup CUDAWrappers
+     * @see CUDAWrappers
      */
     static
     DEAL_II_CUDA_HOST_DEV
@@ -445,7 +445,7 @@ namespace internal
   * of T2 leading to a compile-time error. However simply adding a constructor for VectorizedArray<T1>
   * breaks the POD-idioms needed elsewhere. Calls to constructors of T2 subsequently got replaced by a
   * call to internal::NumberType<T2> which then determines the right function to use by template deduction.
-  * A detailled discussion can be found at https://github.com/dealii/dealii/pull/3967 . Also see
+  * A detailed discussion can be found at https://github.com/dealii/dealii/pull/3967 . Also see
   * numbers.h for another specialization.
   */
   template <typename T>

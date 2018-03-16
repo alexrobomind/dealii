@@ -62,10 +62,8 @@ FE_DGQ<dim, spacedim>::FE_DGQ (const unsigned int degree)
 {
   // Compute support points, which are the tensor product of the Lagrange
   // interpolation points in the constructor.
-  Quadrature<dim> support_quadrature(internal::FE_DGQ::get_QGaussLobatto_points(degree));
-  Assert (support_quadrature.get_points().size() > 0,
-          (typename FiniteElement<dim, spacedim>::ExcFEHasNoSupportPoints ()));
-  this->unit_support_points = support_quadrature.get_points();
+  this->unit_support_points =
+    Quadrature<dim>(internal::FE_DGQ::get_QGaussLobatto_points(degree)).get_points();
 
   // do not initialize embedding and restriction here. these matrices are
   // initialized on demand in get_restriction_matrix and
@@ -877,30 +875,8 @@ FE_DGQLegendre<dim,spacedim>::clone() const
 
 template <int dim, int spacedim>
 FE_DGQHermite<dim,spacedim>::FE_DGQHermite (const unsigned int degree)
-  : FE_DGQ<dim,spacedim>(degree < 3 ?
-                         Polynomials::generate_complete_Lagrange_basis
-                         (internal::FE_DGQ::get_QGaussLobatto_points(degree))
-                         :
-                         Polynomials::HermiteLikeInterpolation::generate_complete_basis(degree))
+  : FE_DGQ<dim,spacedim>(Polynomials::HermiteLikeInterpolation::generate_complete_basis(degree))
 {}
-
-
-
-template <int dim, int spacedim>
-std::pair<Table<2,bool>, std::vector<unsigned int> >
-FE_DGQHermite<dim,spacedim>::get_constant_modes () const
-{
-  if (this->degree < 3)
-    return this->FE_DGQ<dim,spacedim>::get_constant_modes();
-  else
-    {
-      AssertThrow(false,
-                  ExcMessage("Constant mode cannot be represented by 0/1 vector"));
-      return std::pair<Table<2,bool>, std::vector<unsigned int> >
-             (Table<2,bool>(1, this->dofs_per_cell),
-              std::vector<unsigned int>(1, 0));
-    }
-}
 
 
 

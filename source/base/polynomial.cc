@@ -1286,9 +1286,6 @@ namespace Polynomials
     :
     Polynomial<double>(0)
   {
-    Assert(degree>=3,
-           ExcNotImplemented("Hermite interpolation makes no sense for "
-                             "degrees less than three"));
     AssertIndexRange(index, degree+1);
 
     this->coefficients.clear();
@@ -1296,16 +1293,52 @@ namespace Polynomials
 
     this->lagrange_support_points.resize(degree);
 
-    // 4 Polynomials with degree 3
-    // entries (1,0) and (3,2) of the mass matrix will be equal to 0
-    //
-    //     | x  0  x  x |
-    //     | 0  x  x  x |
-    // M = | x  x  x  0 |
-    //     | x  x  0  x |
-    //
-    if (degree==3)
+    if (degree == 0)
+      this->lagrange_weight = 1.;
+    else if (degree == 1)
       {
+        if (index == 0)
+          {
+            this->lagrange_support_points[0] = 1.;
+            this->lagrange_weight = -1.;
+          }
+        else
+          {
+            this->lagrange_support_points[0] = 0.;
+            this->lagrange_weight = 1.;
+          }
+      }
+    else if (degree == 2)
+      {
+        if (index == 0)
+          {
+            this->lagrange_support_points[0] = 1.;
+            this->lagrange_support_points[1] = 1.;
+            this->lagrange_weight = 1.;
+          }
+        else if (index == 1)
+          {
+            this->lagrange_support_points[0] = 0;
+            this->lagrange_support_points[1] = 1;
+            this->lagrange_weight = -2.;
+          }
+        else
+          {
+            this->lagrange_support_points[0] = 0.;
+            this->lagrange_support_points[1] = 0.;
+            this->lagrange_weight = 1.;
+          }
+      }
+    else if (degree==3)
+      {
+        // 4 Polynomials with degree 3
+        // entries (1,0) and (3,2) of the mass matrix will be equal to 0
+        //
+        //     | x  0  x  x |
+        //     | 0  x  x  x |
+        // M = | x  x  x  0 |
+        //     | x  x  0  x |
+        //
         if (index==0)
           {
             this->lagrange_support_points[0] = 2./7.;
@@ -1318,14 +1351,17 @@ namespace Polynomials
             this->lagrange_support_points[0] = 0.;
             this->lagrange_support_points[1] = 1.;
             this->lagrange_support_points[2] = 1.;
-            this->lagrange_weight = 6.75;
+
+            // this magic value 5.5 is obtained when evaluating the general
+            // formula below for the degree=3 case
+            this->lagrange_weight = 5.5;
           }
         else if (index==2)
           {
             this->lagrange_support_points[0] = 0.;
             this->lagrange_support_points[1] = 0.;
             this->lagrange_support_points[2] = 1.;
-            this->lagrange_weight = -6.75;
+            this->lagrange_weight = -5.5;
           }
         else if (index==3)
           {
@@ -1335,23 +1371,22 @@ namespace Polynomials
             this->lagrange_weight = 3.5;
           }
       }
-
-    // Higher order Polynomials degree>=4: the entries (1,0) and
-    // (degree,degree-1) of the mass matrix will be equal to 0
-    //
-    //     | x  0  x  x         x  x  x |
-    //     | 0  x  x  x  . . .  x  x  x |
-    //     | x  x  x  x         x  x  x |
-    //     | x  x  x  x         x  x  x |
-    //     |     .       .         .    |
-    // M = |     .         .       .    |
-    //     |     .           .     .    |
-    //     | x  x  x  x         x  x  x |
-    //     | x  x  x  x  . . .  x  x  0 |
-    //     | x  x  x  x         x  0  x |
-    //
-    if (degree >= 4)
+    else
       {
+        // Higher order Polynomials degree>=4: the entries (1,0) and
+        // (degree,degree-1) of the mass matrix will be equal to 0
+        //
+        //     | x  0  x  x         x  x  x |
+        //     | 0  x  x  x  . . .  x  x  x |
+        //     | x  x  x  x         x  x  x |
+        //     | x  x  x  x         x  x  x |
+        //     |     .       .         .    |
+        // M = |     .         .       .    |
+        //     |     .           .     .    |
+        //     | x  x  x  x         x  x  x |
+        //     | x  x  x  x  . . .  x  x  0 |
+        //     | x  x  x  x         x  0  x |
+        //
         // We find the inner points as the zeros of the Jacobi polynomials
         // with alpha = beta = 2 which is the polynomial with the kernel
         // (1-x)^2 (1+x)^2, the two polynomials achieving zero value and zero
@@ -1413,8 +1448,30 @@ namespace Polynomials
             this->lagrange_support_points[degree-2] = 1.;
             this->lagrange_support_points[degree-1] = 1.;
 
-            // scale close to approximate maximum
-            this->lagrange_weight = 1./this->value(0.4*jacobi_roots(0));
+            // Select the weight to make the derivative of the sum of P_0 and
+            // P_1 in zero to be 0. The derivative in x=0 is simply given by
+            // p~(0)/auxiliary_zero+p~'(0) + a*p~(0), where p~(x) is the
+            // Lagrange polynomial in all points except the first one which is
+            // the same for P_0 and P_1, and a is the weight we seek here. If
+            // we solve this for a, we obtain the desired property. Since the
+            // basis is nodal for all interior points, this property ensures
+            // that the sum of all polynomials with weight 1 is one.
+            std::vector<Point<1>> points(degree);
+            double ratio = 1.;
+            for (unsigned int i=0; i<degree; ++i)
+              {
+                points[i][0] = this->lagrange_support_points[i];
+                if (i>0)
+                  ratio *= -this->lagrange_support_points[i];
+              }
+            Polynomial<double> helper(points, 0);
+            std::vector<double> value_and_grad(2);
+            helper.value(0., value_and_grad);
+            Assert(std::abs(value_and_grad[0]) > 1e-10,
+                   ExcInternalError("There should not be a zero at x=0."));
+
+            const double auxiliary_zero = find_support_point_x_star(jacobi_roots);
+            this->lagrange_weight = (1./auxiliary_zero - value_and_grad[1]/value_and_grad[0])/ratio;
           }
         else if (index>=2 && index<degree-1)
           {
@@ -1438,7 +1495,22 @@ namespace Polynomials
               this->lagrange_support_points[m+2] = jacobi_roots(m);
             this->lagrange_support_points[degree-1] = 1.;
 
-            this->lagrange_weight = 1./this->value(1.0-0.4*jacobi_roots(0));
+            std::vector<Point<1>> points(degree);
+            double ratio = 1.;
+            for (unsigned int i=0; i<degree; ++i)
+              {
+                points[i][0] = this->lagrange_support_points[i];
+                if (i<degree-1)
+                  ratio *= 1.-this->lagrange_support_points[i];
+              }
+            Polynomial<double> helper(points, degree-1);
+            std::vector<double> value_and_grad(2);
+            helper.value(1., value_and_grad);
+            Assert(std::abs(value_and_grad[0]) > 1e-10,
+                   ExcInternalError("There should not be a zero at x=1."));
+
+            const double auxiliary_zero = find_support_point_x_star(jacobi_roots);
+            this->lagrange_weight = (-1./auxiliary_zero - value_and_grad[1]/value_and_grad[0])/ratio;
           }
         else if (index==degree)
           {

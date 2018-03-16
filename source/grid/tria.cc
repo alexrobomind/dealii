@@ -2071,7 +2071,7 @@ namespace internal
                     // if we are here, it means that we want to assign a boundary indicator
                     // different from numbers::internal_face_boundary_id to an internal line.
                     // As said, this would be not allowed, and an exception should be immediately
-                    // thrown. Still, there is the possibility that one only wants to specifiy a
+                    // thrown. Still, there is the possibility that one only wants to specify a
                     // manifold_id here. If that is the case (manifold_id !=  numbers::flat_manifold_id)
                     // the operation is allowed. Otherwise, we really tried to specify a boundary_id
                     // (and not a manifold_id) to an internal face. The exception must be thrown.
@@ -5092,7 +5092,7 @@ namespace internal
                 // are not consecutive, we cannot do so and have to
                 // replace them by two lines that are consecutive. we
                 // try to avoid that situation, but it may happen
-                // nevertheless throug repeated refinement and
+                // nevertheless through repeated refinement and
                 // coarsening. thus we have to check here, as we will
                 // need some additional space to store those new lines
                 // in case we need them...
@@ -8829,22 +8829,22 @@ Triangulation (const MeshSmoothing smooth_grid,
 
 template <int dim, int spacedim>
 Triangulation<dim, spacedim>::
-Triangulation (Triangulation<dim, spacedim> &&tria)
-  :
-  Subscriptor(tria),
-  smooth_grid(tria.smooth_grid),
-  periodic_face_pairs_level_0(std::move(tria.periodic_face_pairs_level_0)),
-  periodic_face_map(std::move(tria.periodic_face_map)),
-  levels(std::move(tria.levels)),
-  faces(std::move(tria.faces)),
-  vertices(std::move(tria.vertices)),
-  vertices_used(std::move(tria.vertices_used)),
-  manifold(std::move(tria.manifold)),
-  anisotropic_refinement(tria.anisotropic_refinement),
-  check_for_distorted_cells(tria.check_for_distorted_cells),
-  number_cache(tria.number_cache),
-  vertex_to_boundary_id_map_1d(std::move(tria.vertex_to_boundary_id_map_1d)),
-  vertex_to_manifold_id_map_1d(std::move(tria.vertex_to_manifold_id_map_1d))
+Triangulation (Triangulation<dim, spacedim> &&tria) noexcept
+:
+Subscriptor(std::move(tria)),
+            smooth_grid(tria.smooth_grid),
+            periodic_face_pairs_level_0(std::move(tria.periodic_face_pairs_level_0)),
+            periodic_face_map(std::move(tria.periodic_face_map)),
+            levels(std::move(tria.levels)),
+            faces(std::move(tria.faces)),
+            vertices(std::move(tria.vertices)),
+            vertices_used(std::move(tria.vertices_used)),
+            manifold(std::move(tria.manifold)),
+            anisotropic_refinement(tria.anisotropic_refinement),
+            check_for_distorted_cells(tria.check_for_distorted_cells),
+            number_cache(std::move(tria.number_cache)),
+            vertex_to_boundary_id_map_1d(std::move(tria.vertex_to_boundary_id_map_1d)),
+            vertex_to_manifold_id_map_1d(std::move(tria.vertex_to_manifold_id_map_1d))
 {
   tria.number_cache = internal::Triangulation::NumberCache<dim>();
 }
@@ -8852,7 +8852,7 @@ Triangulation (Triangulation<dim, spacedim> &&tria)
 
 template <int dim, int spacedim>
 Triangulation<dim, spacedim> &
-Triangulation<dim, spacedim>::operator= (Triangulation<dim, spacedim> &&tria)
+Triangulation<dim, spacedim>::operator= (Triangulation<dim, spacedim> &&tria) noexcept
 {
   Subscriptor::operator=(std::move(tria));
 
@@ -9268,13 +9268,13 @@ create_triangulation (const std::vector<Point<spacedim> >    &v,
   /*
       When the triangulation is a manifold (dim < spacedim), the normal field
       provided from the map class depends on the order of the vertices.
-      It may happen that this normal field is discontinous.
+      It may happen that this normal field is discontinuous.
       The following code takes care that this is not the case by setting the
       cell direction flag on those cell that produce the wrong orientation.
 
       To determine if 2 neighbours have the same or opposite orientation
       we use a table of truth.
-      Its entries are indexes by the local indeces of the common face.
+      Its entries are indexes by the local indices of the common face.
       For example if two elements share a face, and this face is
       face 0 for element 0 and face 1 for element 1, then
       table(0,1) will tell whether the orientation are the same (true) or

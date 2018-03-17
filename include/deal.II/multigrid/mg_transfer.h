@@ -160,7 +160,11 @@ namespace internal
     // The support of MatrixSelectore is therefore limited to that type for PETSc
     template <typename DoFHandlerType>
     static void reinit(Matrix &matrix, Sparsity &, int level, dealii::DynamicSparsityPattern &sp, const DoFHandlerType &dh)
-    {      
+    {
+	  // Get communicator from triangulation if it is parallel
+      const parallel::Triangulation<DoFHandlerType::dimension,DoFHandlerType::space_dimension> *dist_tria =
+        dynamic_cast<const parallel::Triangulation<DoFHandlerType::dimension,DoFHandlerType::space_dimension>*>
+        (&(dh.get_triangulation()));
       MPI_Comm communicator = dist_tria != nullptr ?
                               dist_tria->get_communicator() :
                               MPI_COMM_SELF;

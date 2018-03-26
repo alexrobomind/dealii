@@ -382,9 +382,6 @@ namespace PETScWrappers
       //if (preset_nonzero_locations == true)
       if (local_rows.n_elements()>0)
         {
-		  // TODO: Find out why the following assert exists, but I don't see why a PETSc matrix should not allow "no local columns"
-          // Assert(local_columns.n_elements()>0, ExcInternalError());
-		  
           // MatMPIAIJSetPreallocationCSR
           // can be used to allocate the sparsity
           // pattern of a matrix

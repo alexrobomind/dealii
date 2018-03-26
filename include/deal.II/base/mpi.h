@@ -52,7 +52,7 @@ DEAL_II_NAMESPACE_OPEN
 //Forward type declarations to allow MPI sums over tensorial types
 template <int rank, int dim, typename Number> class Tensor;
 template <int rank, int dim, typename Number> class SymmetricTensor;
-
+template <typename Number> class SparseMatrix;
 
 namespace Utilities
 {
@@ -197,6 +197,20 @@ namespace Utilities
          const MPI_Comm &mpi_communicator);
 
     /**
+     * Perform an MPI sum of the entries of a SparseMatrix.
+     *
+     * @note @p local and @p global should have the same sparsity
+     * pattern and it should be the same for all MPI processes.
+     *
+     * @relatesalso SparseMatrix
+     */
+    template <typename Number>
+    void
+    sum (const SparseMatrix<Number> &local,
+         const MPI_Comm &mpi_communicator,
+         SparseMatrix<Number> &global);
+
+    /**
      * Return the maximum over all processors of the value @p t. This function
      * is collective over all processors given in the
      * @ref GlossMPICommunicator "communicator".
@@ -314,19 +328,34 @@ namespace Utilities
     {
       /**
        * The sum over all values contributed by the processors that
-       * participate in the call to min_max_avg(), as well as the
-       * minimum and maximum value.
+       * participate in the call to min_max_avg().
        */
       double sum;
+
+      /**
+       * The minimum value over all values contributed by the processors that
+       * participate in the call to min_max_avg().
+       */
       double min;
+
+      /**
+       * The maximum value over all values contributed by the processors that
+       * participate in the call to min_max_avg().
+       */
       double max;
 
       /**
-       * The indices (i.e., @ref GlossMPIRank "MPI rank" within an
+       * One of the ranks (i.e., @ref GlossMPIRank "MPI rank" within an
        * @ref GlossMPICommunicator "MPI communicator") of the
-       * processors that hold the minimal and maximal values.
+       * processors that hold the minimal value.
        */
       unsigned int min_index;
+
+      /**
+       * One of the ranks (i.e., @ref GlossMPIRank "MPI rank" within an
+       * @ref GlossMPICommunicator "MPI communicator") of the
+       * processors that hold the maximal value.
+       */
       unsigned int max_index;
 
       /**

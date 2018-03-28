@@ -155,9 +155,12 @@ namespace internal
     typedef ::dealii::DynamicSparsityPattern Sparsity;
     typedef ::dealii::PETScWrappers::MPI::SparseMatrix Matrix;
 
-    // Since PETSc matrices do not offer the functionality to fill up incomplete sparsity patterns on their own, the sparsity pattern must be manually distributed
-    // This only works if the row index set is known, which can be extracted from a DynamicSparsityPattern but not the other types
-    // The support of MatrixSelectore is therefore limited to that type for PETSc
+    // Since PETSc matrices do not offer the functionality to fill up in-
+	// complete sparsity patterns on their own, the sparsity pattern must be
+	// manually distributed. This only works if the row index set is known,
+	// which can be extracted from a DynamicSparsityPattern but not the other
+	// types. The support of MatrixSelector is therefore limited to that
+	// sparsity pattern type for PETSc vectors.
     template <typename DoFHandlerType>
     static void reinit(Matrix &matrix, Sparsity &, int level, dealii::DynamicSparsityPattern &sp, const DoFHandlerType &dh)
     {

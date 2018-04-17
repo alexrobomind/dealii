@@ -52,7 +52,7 @@ namespace internal
     typedef ::dealii::SparseMatrix<typename VectorType::value_type> Matrix;
 
     template <typename SparsityPatternType, typename DoFHandlerType>
-    static void reinit(Matrix &matrix, Sparsity &sparsity, int level, SparsityPatternType &sp, const DoFHandlerType &)
+    static void reinit(Matrix &matrix, Sparsity &sparsity, int level, const SparsityPatternType &sp, const DoFHandlerType &)
     {
       sparsity.copy_from (sp);
       (void)level;
@@ -68,7 +68,7 @@ namespace internal
     typedef ::dealii::TrilinosWrappers::SparseMatrix Matrix;
 
     template <typename SparsityPatternType, typename DoFHandlerType>
-    static void reinit(Matrix &matrix, Sparsity &, int level, SparsityPatternType &sp, DoFHandlerType &dh)
+    static void reinit(Matrix &matrix, Sparsity &, int level, const SparsityPatternType &sp, DoFHandlerType &dh)
     {
       const parallel::Triangulation<DoFHandlerType::dimension,DoFHandlerType::space_dimension> *dist_tria =
         dynamic_cast<const parallel::Triangulation<DoFHandlerType::dimension,DoFHandlerType::space_dimension>*>
@@ -91,7 +91,7 @@ namespace internal
     typedef ::dealii::TrilinosWrappers::SparseMatrix Matrix;
 
     template <typename SparsityPatternType, typename DoFHandlerType>
-    static void reinit(Matrix &matrix, Sparsity &, int level, SparsityPatternType &sp, DoFHandlerType &dh)
+    static void reinit(Matrix &matrix, Sparsity &, int level, const SparsityPatternType &sp, DoFHandlerType &dh)
     {
       const parallel::Triangulation<DoFHandlerType::dimension,DoFHandlerType::space_dimension> *dist_tria =
         dynamic_cast<const parallel::Triangulation<DoFHandlerType::dimension,DoFHandlerType::space_dimension>*>
@@ -114,7 +114,7 @@ namespace internal
     typedef ::dealii::TrilinosWrappers::SparseMatrix Matrix;
 
     template <typename SparsityPatternType, typename DoFHandlerType>
-    static void reinit(Matrix &matrix, Sparsity &, int level, SparsityPatternType &sp, DoFHandlerType &dh)
+    static void reinit(Matrix &matrix, Sparsity &, int level, const SparsityPatternType &sp, DoFHandlerType &dh)
     {
       const parallel::Triangulation<DoFHandlerType::dimension,DoFHandlerType::space_dimension> *dist_tria =
         dynamic_cast<const parallel::Triangulation<DoFHandlerType::dimension,DoFHandlerType::space_dimension>*>
@@ -138,7 +138,7 @@ namespace internal
     typedef ::dealii::SparseMatrix<Number> Matrix;
 
     template <typename SparsityPatternType, typename DoFHandlerType>
-    static void reinit(Matrix &, Sparsity &, int, SparsityPatternType &, const DoFHandlerType &)
+    static void reinit(Matrix &, Sparsity &, int, const SparsityPatternType &, const DoFHandlerType &)
     {
       AssertThrow(false, ExcNotImplemented(
                     "ERROR: MGTransferPrebuilt with LinearAlgebra::distributed::Vector currently "
@@ -162,7 +162,7 @@ namespace internal
 	// types. The support of MatrixSelector is therefore limited to that
 	// sparsity pattern type for PETSc vectors.
     template <typename SparsityPatternType, typename DoFHandlerType>
-    static void reinit(Matrix &matrix, Sparsity &, int level, SparsityPatternType &sp, const DoFHandlerType &dh)
+    static void reinit(Matrix &matrix, Sparsity &, int level, const SparsityPatternType &sp, const DoFHandlerType &dh)
     {
       // Reinit PETSc matrix
       matrix.reinit(dh.locally_owned_mg_dofs(level+1),

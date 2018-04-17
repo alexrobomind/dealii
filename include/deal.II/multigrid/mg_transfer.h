@@ -161,8 +161,8 @@ namespace internal
 	// which can be extracted from a DynamicSparsityPattern but not the other
 	// types. The support of MatrixSelector is therefore limited to that
 	// sparsity pattern type for PETSc vectors.
-    template <typename DoFHandlerType>
-    static void reinit(Matrix &matrix, Sparsity &, int level, dealii::DynamicSparsityPattern &sp, const DoFHandlerType &dh)
+    template <typename SparsityPatternType, typename DoFHandlerType>
+    static void reinit(Matrix &matrix, Sparsity &, int level, SparsityPatternType &sp, const DoFHandlerType &dh)
     {
       // Reinit PETSc matrix
       matrix.reinit(dh.locally_owned_mg_dofs(level+1),

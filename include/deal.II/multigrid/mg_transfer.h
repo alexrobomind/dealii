@@ -164,31 +164,6 @@ namespace internal
     template <typename DoFHandlerType>
     static void reinit(Matrix &matrix, Sparsity &, int level, dealii::DynamicSparsityPattern &sp, const DoFHandlerType &dh)
     {
-      // Get communicator from triangulation if it is parallel
-      const parallel::Triangulation<DoFHandlerType::dimension,DoFHandlerType::space_dimension> *dist_tria =
-        dynamic_cast<const parallel::Triangulation<DoFHandlerType::dimension,DoFHandlerType::space_dimension>*>
-        (&(dh.get_triangulation()));
-      MPI_Comm communicator = dist_tria != nullptr ?
-                              dist_tria->get_communicator() :
-                              MPI_COMM_SELF;
-
-      // Compute # of locally owned MG dofs / processor for distribution
-      const std::vector<::dealii::IndexSet> &locally_owned_mg_dofs_per_processor = dh.locally_owned_mg_dofs_per_processor(level+1);
-      std::vector<::dealii::types::global_dof_index> n_locally_owned_mg_dofs_per_processor(locally_owned_mg_dofs_per_processor.size(), 0);
-
-      for (size_t index = 0; index < n_locally_owned_mg_dofs_per_processor.size(); ++index)
-        {
-          n_locally_owned_mg_dofs_per_processor[index] = locally_owned_mg_dofs_per_processor[index].n_elements();
-        }
-
-      // Distribute sparsity pattern
-      ::dealii::SparsityTools::distribute_sparsity_pattern(
-        sp,
-        n_locally_owned_mg_dofs_per_processor,
-        communicator,
-        sp.row_index_set()
-      );
-
       // Reinit PETSc matrix
       matrix.reinit(dh.locally_owned_mg_dofs(level+1),
                     dh.locally_owned_mg_dofs(level),

@@ -236,6 +236,33 @@ void MGTransferPrebuilt<VectorType>::build_matrices
               }
           }
 
+      // Distribute sparsity pattern over all processes
+      // Retrieve communicator from triangulation if it is parallel
+      const parallel::Triangulation<DoFHandlerType::dimension,DoFHandlerType::space_dimension> *dist_tria =
+        dynamic_cast<const parallel::Triangulation<DoFHandlerType::dimension,DoFHandlerType::space_dimension>*>
+        (&(mg_dof.get_triangulation()));
+		
+      MPI_Comm communicator = dist_tria != nullptr ?
+                              dist_tria->get_communicator() :
+                              MPI_COMM_SELF;
+
+      // Compute # of locally owned MG dofs / processor for distribution
+      const std::vector<::dealii::IndexSet> &locally_owned_mg_dofs_per_processor = dh.locally_owned_mg_dofs_per_processor(level+1);
+      std::vector<::dealii::types::global_dof_index> n_locally_owned_mg_dofs_per_processor(locally_owned_mg_dofs_per_processor.size(), 0);
+
+      for (size_t index = 0; index < n_locally_owned_mg_dofs_per_processor.size(); ++index)
+      {
+        n_locally_owned_mg_dofs_per_processor[index] = locally_owned_mg_dofs_per_processor[index].n_elements();
+      }
+
+      // Distribute sparsity pattern
+      ::dealii::SparsityTools::distribute_sparsity_pattern(
+        dsp,
+        n_locally_owned_mg_dofs_per_processor,
+        communicator,
+        dsp.row_index_set()
+      );
+	  
       internal::MatrixSelector<VectorType>::reinit(*prolongation_matrices[level],
                                                    *prolongation_sparsities[level],
                                                    level,

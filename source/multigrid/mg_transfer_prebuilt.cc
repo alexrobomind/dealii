@@ -245,8 +245,8 @@ void MGTransferPrebuilt<VectorType>::build_matrices
       // sparsity pattern type for PETSc vectors.
 	  
       // Retrieve communicator from triangulation if it is parallel
-      const parallel::Triangulation<DoFHandlerType::dimension,DoFHandlerType::space_dimension> *dist_tria =
-        dynamic_cast<const parallel::Triangulation<DoFHandlerType::dimension,DoFHandlerType::space_dimension>*>
+      const parallel::Triangulation<dim,spacedim> *dist_tria =
+        dynamic_cast<const parallel::Triangulation<dim,spacedim>*>
         (&(mg_dof.get_triangulation()));
 		
       MPI_Comm communicator = dist_tria != nullptr ?
@@ -254,7 +254,7 @@ void MGTransferPrebuilt<VectorType>::build_matrices
                               MPI_COMM_SELF;
 
       // Compute # of locally owned MG dofs / processor for distribution
-      const std::vector<::dealii::IndexSet> &locally_owned_mg_dofs_per_processor = dh.locally_owned_mg_dofs_per_processor(level+1);
+      const std::vector<::dealii::IndexSet> &locally_owned_mg_dofs_per_processor = mg_dof.locally_owned_mg_dofs_per_processor(level+1);
       std::vector<::dealii::types::global_dof_index> n_locally_owned_mg_dofs_per_processor(locally_owned_mg_dofs_per_processor.size(), 0);
 
       for (size_t index = 0; index < n_locally_owned_mg_dofs_per_processor.size(); ++index)

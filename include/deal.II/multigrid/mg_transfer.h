@@ -158,6 +158,12 @@ namespace internal
     template <typename SparsityPatternType, typename DoFHandlerType>
     static void reinit(Matrix &matrix, Sparsity &, int level, const SparsityPatternType &sp, const DoFHandlerType &dh)
     {
+      const parallel::Triangulation<DoFHandlerType::dimension,DoFHandlerType::space_dimension> *dist_tria =
+        dynamic_cast<const parallel::Triangulation<DoFHandlerType::dimension,DoFHandlerType::space_dimension>*>
+        (&(dh.get_triangulation()));
+      MPI_Comm communicator = dist_tria != nullptr ?
+                              dist_tria->get_communicator() :
+                              MPI_COMM_SELF;
       // Reinit PETSc matrix
       matrix.reinit(dh.locally_owned_mg_dofs(level+1),
                     dh.locally_owned_mg_dofs(level),

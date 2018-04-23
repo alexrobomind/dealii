@@ -237,39 +237,42 @@ void MGTransferPrebuilt<VectorType>::build_matrices
           }
 
       
-      // Since PETSc matrices do not offer the functionality to fill up in-
-      // complete sparsity patterns on their own, the sparsity pattern must be
-      // manually distributed. This only works if the row index set is known,
-      // which can be extracted from a DynamicSparsityPattern but not the other
-      // types. The support of MatrixSelector is therefore limited to that
-      // sparsity pattern type for PETSc vectors.
+	  if(internal::MatrixSelector<VectorType>::requires_distributed_sparsity_pattern)
+	    {
+          // Since PETSc matrices do not offer the functionality to fill up in-
+          // complete sparsity patterns on their own, the sparsity pattern must be
+          // manually distributed. This only works if the row index set is known,
+          // which can be extracted from a DynamicSparsityPattern but not the other
+          // types. The support of MatrixSelector is therefore limited to that
+          // sparsity pattern type for PETSc vectors.
 	  
-      // Retrieve communicator from triangulation if it is parallel
-      const parallel::Triangulation<dim,spacedim> *dist_tria =
-        dynamic_cast<const parallel::Triangulation<dim,spacedim>*>
-        (&(mg_dof.get_triangulation()));
+          // Retrieve communicator from triangulation if it is parallel
+          const parallel::Triangulation<dim,spacedim> *dist_tria =
+            dynamic_cast<const parallel::Triangulation<dim,spacedim>*>
+            (&(mg_dof.get_triangulation()));
 		
-      MPI_Comm communicator = dist_tria != nullptr ?
-                              dist_tria->get_communicator() :
-                              MPI_COMM_SELF;
+          MPI_Comm communicator = dist_tria != nullptr ?
+                                  dist_tria->get_communicator() :
+                                  MPI_COMM_SELF;
 
-      // Compute # of locally owned MG dofs / processor for distribution
-      const std::vector<::dealii::IndexSet> &locally_owned_mg_dofs_per_processor = mg_dof.locally_owned_mg_dofs_per_processor(level+1);
-      std::vector<::dealii::types::global_dof_index> n_locally_owned_mg_dofs_per_processor(locally_owned_mg_dofs_per_processor.size(), 0);
+          // Compute # of locally owned MG dofs / processor for distribution
+          const std::vector<::dealii::IndexSet> &locally_owned_mg_dofs_per_processor = mg_dof.locally_owned_mg_dofs_per_processor(level+1);
+          std::vector<::dealii::types::global_dof_index> n_locally_owned_mg_dofs_per_processor(locally_owned_mg_dofs_per_processor.size(), 0);
 
-      for (size_t index = 0; index < n_locally_owned_mg_dofs_per_processor.size(); ++index)
-        {
-          n_locally_owned_mg_dofs_per_processor[index] = locally_owned_mg_dofs_per_processor[index].n_elements();
+          for (size_t index = 0; index < n_locally_owned_mg_dofs_per_processor.size(); ++index)
+            {
+              n_locally_owned_mg_dofs_per_processor[index] = locally_owned_mg_dofs_per_processor[index].n_elements();
+            }
+
+          // Distribute sparsity pattern
+          ::dealii::SparsityTools::distribute_sparsity_pattern(
+            dsp,
+            n_locally_owned_mg_dofs_per_processor,
+            communicator,
+            dsp.row_index_set()
+          );
         }
-
-      // Distribute sparsity pattern
-      ::dealii::SparsityTools::distribute_sparsity_pattern(
-        dsp,
-        n_locally_owned_mg_dofs_per_processor,
-        communicator,
-        dsp.row_index_set()
-      );
-      
+		
       internal::MatrixSelector<VectorType>::reinit(*prolongation_matrices[level],
                                                    *prolongation_sparsities[level],
                                                    level,

@@ -236,7 +236,14 @@ void MGTransferPrebuilt<VectorType>::build_matrices
               }
           }
 
-      // Distribute sparsity pattern over all processes
+      
+      // Since PETSc matrices do not offer the functionality to fill up in-
+      // complete sparsity patterns on their own, the sparsity pattern must be
+      // manually distributed. This only works if the row index set is known,
+      // which can be extracted from a DynamicSparsityPattern but not the other
+      // types. The support of MatrixSelector is therefore limited to that
+      // sparsity pattern type for PETSc vectors.
+	  
       // Retrieve communicator from triangulation if it is parallel
       const parallel::Triangulation<DoFHandlerType::dimension,DoFHandlerType::space_dimension> *dist_tria =
         dynamic_cast<const parallel::Triangulation<DoFHandlerType::dimension,DoFHandlerType::space_dimension>*>
@@ -251,9 +258,9 @@ void MGTransferPrebuilt<VectorType>::build_matrices
       std::vector<::dealii::types::global_dof_index> n_locally_owned_mg_dofs_per_processor(locally_owned_mg_dofs_per_processor.size(), 0);
 
       for (size_t index = 0; index < n_locally_owned_mg_dofs_per_processor.size(); ++index)
-      {
-        n_locally_owned_mg_dofs_per_processor[index] = locally_owned_mg_dofs_per_processor[index].n_elements();
-      }
+        {
+          n_locally_owned_mg_dofs_per_processor[index] = locally_owned_mg_dofs_per_processor[index].n_elements();
+        }
 
       // Distribute sparsity pattern
       ::dealii::SparsityTools::distribute_sparsity_pattern(
@@ -262,7 +269,7 @@ void MGTransferPrebuilt<VectorType>::build_matrices
         communicator,
         dsp.row_index_set()
       );
-	  
+      
       internal::MatrixSelector<VectorType>::reinit(*prolongation_matrices[level],
                                                    *prolongation_sparsities[level],
                                                    level,

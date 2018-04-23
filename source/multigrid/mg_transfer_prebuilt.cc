@@ -241,10 +241,7 @@ void MGTransferPrebuilt<VectorType>::build_matrices
 	    {
           // Since PETSc matrices do not offer the functionality to fill up in-
           // complete sparsity patterns on their own, the sparsity pattern must be
-          // manually distributed. This only works if the row index set is known,
-          // which can be extracted from a DynamicSparsityPattern but not the other
-          // types. The support of MatrixSelector is therefore limited to that
-          // sparsity pattern type for PETSc vectors.
+          // manually distributed.
 	  
           // Retrieve communicator from triangulation if it is parallel
           const parallel::Triangulation<dim,spacedim> *dist_tria =

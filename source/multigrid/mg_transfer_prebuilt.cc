@@ -236,18 +236,18 @@ void MGTransferPrebuilt<VectorType>::build_matrices
               }
           }
 
-      
-	  if(internal::MatrixSelector<VectorType>::requires_distributed_sparsity_pattern)
-	    {
+
+      if (internal::MatrixSelector<VectorType>::requires_distributed_sparsity_pattern)
+        {
           // Since PETSc matrices do not offer the functionality to fill up in-
           // complete sparsity patterns on their own, the sparsity pattern must be
           // manually distributed.
-	  
+
           // Retrieve communicator from triangulation if it is parallel
           const parallel::Triangulation<dim,spacedim> *dist_tria =
             dynamic_cast<const parallel::Triangulation<dim,spacedim>*>
             (&(mg_dof.get_triangulation()));
-		
+
           MPI_Comm communicator = dist_tria != nullptr ?
                                   dist_tria->get_communicator() :
                                   MPI_COMM_SELF;
@@ -269,7 +269,7 @@ void MGTransferPrebuilt<VectorType>::build_matrices
             dsp.row_index_set()
           );
         }
-		
+
       internal::MatrixSelector<VectorType>::reinit(*prolongation_matrices[level],
                                                    *prolongation_sparsities[level],
                                                    level,

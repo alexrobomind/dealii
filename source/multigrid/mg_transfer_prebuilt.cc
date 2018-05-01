@@ -236,7 +236,7 @@ void MGTransferPrebuilt<VectorType>::build_matrices
               }
           }
 
-
+#ifdef DEAL_II_WITH_MPI
       if (internal::MatrixSelector<VectorType>::requires_distributed_sparsity_pattern)
         {
           // Since PETSc matrices do not offer the functionality to fill up in-
@@ -269,6 +269,7 @@ void MGTransferPrebuilt<VectorType>::build_matrices
             dsp.row_index_set()
           );
         }
+#endif
 
       internal::MatrixSelector<VectorType>::reinit(*prolongation_matrices[level],
                                                    *prolongation_sparsities[level],

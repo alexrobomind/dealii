@@ -26,8 +26,8 @@ DEAL_II_NAMESPACE_OPEN
 
 namespace MeshWorker
 {
-  template <int dim, int spacedim, typename number>
-  DoFInfo<dim, spacedim, number>::DoFInfo(const BlockInfo &info)
+  template <int dim, int spacedim, typename number, typename CellIterator, typename FaceIterator>
+  DoFInfo<dim, spacedim, number, CellIterator, FaceIterator>::DoFInfo(const BlockInfo &info)
     : face_number(numbers::invalid_unsigned_int)
     , sub_number(numbers::invalid_unsigned_int)
     , block_info(&info, typeid(*this).name())
@@ -40,9 +40,9 @@ namespace MeshWorker
 
 
 
-  template <int dim, int spacedim, typename number>
+  template <int dim, int spacedim, typename number, typename CellIterator, typename FaceIterator>
   void
-  DoFInfo<dim, spacedim, number>::set_block_indices()
+  DoFInfo<dim, spacedim, number, CellIterator, FaceIterator>::set_block_indices()
   {
     for (unsigned int i = 0; i < indices.size(); ++i)
       {

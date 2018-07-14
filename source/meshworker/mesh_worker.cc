@@ -57,16 +57,16 @@ namespace MeshWorker
   template class LocalResults<float>;
   template class LocalResults<double>;
 
-  template <int dim, int spacedim, typename number>
-  LocalIntegrator<dim, spacedim, number>::LocalIntegrator()
+  template <int dim, int spacedim, typename number, typename CellIterator, typename FaceIterator>
+  LocalIntegrator<dim, spacedim, number, CellIterator, FaceIterator>::LocalIntegrator()
     : use_cell(true)
     , use_boundary(true)
     , use_face(true)
   {}
 
 
-  template <int dim, int spacedim, typename number>
-  LocalIntegrator<dim, spacedim, number>::LocalIntegrator(bool c,
+  template <int dim, int spacedim, typename number, typename CellIterator, typename FaceIterator>
+  LocalIntegrator<dim, spacedim, number, CellIterator, FaceIterator>::LocalIntegrator(bool c,
                                                           bool b,
                                                           bool f)
     : use_cell(c)
@@ -76,31 +76,31 @@ namespace MeshWorker
 
 
 
-  template <int dim, int spacedim, typename number>
+  template <int dim, int spacedim, typename number, typename CellIterator, typename FaceIterator>
   void
-  LocalIntegrator<dim, spacedim, number>::cell(
-    DoFInfo<dim, spacedim, number> &,
+  LocalIntegrator<dim, spacedim, number, CellIterator, FaceIterator>::cell(
+    DoFInfo<dim, spacedim, number, CellIterator, FaceIterator> &,
     IntegrationInfo<dim, spacedim> &) const
   {
     Assert(false, ExcPureFunction());
   }
 
 
-  template <int dim, int spacedim, typename number>
+  template <int dim, int spacedim, typename number, typename CellIterator, typename FaceIterator>
   void
-  LocalIntegrator<dim, spacedim, number>::boundary(
-    DoFInfo<dim, spacedim, number> &,
+  LocalIntegrator<dim, spacedim, number, CellIterator, FaceIterator>::boundary(
+    DoFInfo<dim, spacedim, number, CellIterator, FaceIterator> &,
     IntegrationInfo<dim, spacedim> &) const
   {
     Assert(false, ExcPureFunction());
   }
 
 
-  template <int dim, int spacedim, typename number>
+  template <int dim, int spacedim, typename number, typename CellIterator, typename FaceIterator>
   void
-  LocalIntegrator<dim, spacedim, number>::face(
-    DoFInfo<dim, spacedim, number> &,
-    DoFInfo<dim, spacedim, number> &,
+  LocalIntegrator<dim, spacedim, number, CellIterator, FaceIterator>::face(
+    DoFInfo<dim, spacedim, number, CellIterator, FaceIterator> &,
+    DoFInfo<dim, spacedim, number, CellIterator, FaceIterator> &,
     IntegrationInfo<dim, spacedim> &,
     IntegrationInfo<dim, spacedim> &) const
   {

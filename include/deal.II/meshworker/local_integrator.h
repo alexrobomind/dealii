@@ -21,6 +21,8 @@
 
 #include <deal.II/base/subscriptor.h>
 
+#include <deal.II/grid/tria.h>
+
 #include <functional>
 #include <string>
 #include <vector>
@@ -29,7 +31,7 @@ DEAL_II_NAMESPACE_OPEN
 
 namespace MeshWorker
 {
-  template <int dim, int spacedim, typename number>
+   template <int dim, int spacedim, typename number, typename CellIterator, typename FaceIterator>
   class DoFInfo;
   template <int dim, int spacedim>
   class IntegrationInfo;
@@ -51,7 +53,7 @@ namespace MeshWorker
    * @author Guido Kanschat
    * @date 2012
    */
-  template <int dim, int spacedim = dim, typename number = double>
+  template <int dim, int spacedim = dim, typename number = double, typename CellIterator = typename Triangulation<dim, spacedim>::cell_iterator, typename FaceIterator = typename Triangulation<dim, spacedim>::face_iterator>
   class LocalIntegrator : public Subscriptor
   {
   public:
@@ -76,22 +78,22 @@ namespace MeshWorker
      * PureFunctionCalled if not overloaded by a derived class.
      */
     virtual void
-    cell(DoFInfo<dim, spacedim, number> &dinfo,
+    cell(DoFInfo<dim, spacedim, number, CellIterator, FaceIterator> &dinfo,
          IntegrationInfo<dim, spacedim> &info) const;
     /**
      * Virtual function for integrating on boundary faces. Throws exception
      * PureFunctionCalled if not overloaded by a derived class.
      */
     virtual void
-    boundary(DoFInfo<dim, spacedim, number> &dinfo,
+    boundary(DoFInfo<dim, spacedim, number, CellIterator, FaceIterator> &dinfo,
              IntegrationInfo<dim, spacedim> &info) const;
     /**
      * Virtual function for integrating on interior faces. Throws exception
      * PureFunctionCalled if not overloaded by a derived class.
      */
     virtual void
-    face(DoFInfo<dim, spacedim, number> &dinfo1,
-         DoFInfo<dim, spacedim, number> &dinfo2,
+    face(DoFInfo<dim, spacedim, number, CellIterator, FaceIterator> &dinfo1,
+         DoFInfo<dim, spacedim, number, CellIterator, FaceIterator> &dinfo2,
          IntegrationInfo<dim, spacedim> &info1,
          IntegrationInfo<dim, spacedim> &info2) const;
 

@@ -202,7 +202,7 @@ namespace MeshWorker
      */
     BlockIndices aux_local_indices;
 
-    friend class DoFInfoBox<dim, DoFInfo<dim, spacedim, number>>;
+    friend class DoFInfoBox<dim, DoFInfo<dim, spacedim, number, CellIterator, FaceIterator>>;
   };
 
 

@@ -192,18 +192,18 @@ namespace MeshWorker
     /**
      * Reinitialize internal data structures for use on a cell.
      */
-    template <typename number>
+    template <typename number, typename cell, typename face>
     void
-    reinit(const DoFInfo<dim, spacedim, number> &i);
+    reinit(const DoFInfo<dim, spacedim, number, cell, face> &i);
 
     /**
      * Use the finite element functions in #global_data and fill the vectors
      * #values, #gradients and #hessians.
      */
-    template <typename number>
+    template <typename number, typename cell, typename face>
     void
-    fill_local_data(const DoFInfo<dim, spacedim, number> &info,
-                    bool                                  split_fevalues);
+    fill_local_data(const DoFInfo<dim, spacedim, number, cell, face> &info,
+                    bool                                             split_fevalues);
 
     /**
      * The global data vector used to compute function values in quadrature
@@ -692,10 +692,10 @@ namespace MeshWorker
 
 
   template <int dim, int spacedim>
-  template <typename number>
+  template <typename number, typename cell, typename face>
   inline void
   IntegrationInfo<dim, spacedim>::reinit(
-    const DoFInfo<dim, spacedim, number> &info)
+    const DoFInfo<dim, spacedim, number, cell, face> &info)
   {
     for (unsigned int i = 0; i < fevalv.size(); ++i)
       {

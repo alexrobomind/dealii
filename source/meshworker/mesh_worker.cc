@@ -16,7 +16,7 @@
 
 #include <deal.II/lac/block_indices.h>
 
-#include <deal.II/meshworker/local_integrator.h>
+#include <deal.II/meshworker/local_integrator.templates.h>
 #include <deal.II/meshworker/local_results.h>
 
 DEAL_II_NAMESPACE_OPEN
@@ -56,57 +56,6 @@ namespace MeshWorker
 
   template class LocalResults<float>;
   template class LocalResults<double>;
-
-  template <int dim, int spacedim, typename number, typename CellIterator, typename FaceIterator>
-  LocalIntegrator<dim, spacedim, number, CellIterator, FaceIterator>::LocalIntegrator()
-    : use_cell(true)
-    , use_boundary(true)
-    , use_face(true)
-  {}
-
-
-  template <int dim, int spacedim, typename number, typename CellIterator, typename FaceIterator>
-  LocalIntegrator<dim, spacedim, number, CellIterator, FaceIterator>::LocalIntegrator(bool c,
-                                                          bool b,
-                                                          bool f)
-    : use_cell(c)
-    , use_boundary(b)
-    , use_face(f)
-  {}
-
-
-
-  template <int dim, int spacedim, typename number, typename CellIterator, typename FaceIterator>
-  void
-  LocalIntegrator<dim, spacedim, number, CellIterator, FaceIterator>::cell(
-    DoFInfo<dim, spacedim, number, CellIterator, FaceIterator> &,
-    IntegrationInfo<dim, spacedim> &) const
-  {
-    Assert(false, ExcPureFunction());
-  }
-
-
-  template <int dim, int spacedim, typename number, typename CellIterator, typename FaceIterator>
-  void
-  LocalIntegrator<dim, spacedim, number, CellIterator, FaceIterator>::boundary(
-    DoFInfo<dim, spacedim, number, CellIterator, FaceIterator> &,
-    IntegrationInfo<dim, spacedim> &) const
-  {
-    Assert(false, ExcPureFunction());
-  }
-
-
-  template <int dim, int spacedim, typename number, typename CellIterator, typename FaceIterator>
-  void
-  LocalIntegrator<dim, spacedim, number, CellIterator, FaceIterator>::face(
-    DoFInfo<dim, spacedim, number, CellIterator, FaceIterator> &,
-    DoFInfo<dim, spacedim, number, CellIterator, FaceIterator> &,
-    IntegrationInfo<dim, spacedim> &,
-    IntegrationInfo<dim, spacedim> &) const
-  {
-    Assert(false, ExcPureFunction());
-  }
-
 
   template class LocalIntegrator<1, 1, float>;
   template class LocalIntegrator<1, 1, double>;

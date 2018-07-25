@@ -86,10 +86,10 @@ namespace MeshWorker
 
 
   template <int dim, int sdim>
-  template <typename number>
+  template <typename number, typename cell, typename face>
   void
   IntegrationInfo<dim, sdim>::fill_local_data(
-    const DoFInfo<dim, sdim, number> &info,
+    const DoFInfo<dim, sdim, number, cell, face> &info,
     bool                              split_fevalues)
   {
     if (split_fevalues)

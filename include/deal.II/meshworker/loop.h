@@ -491,39 +491,39 @@ namespace MeshWorker
    * @ingroup MeshWorker
    * @author Guido Kanschat, 2009
    */
-  template <int dim, int spacedim, class ITERATOR, class ASSEMBLER>
+  template <int dim, int spacedim, class ITERATOR, class ASSEMBLER, class NUMBER, class CELL, class FACE>
   void
-  integration_loop(ITERATOR                              begin,
-                   typename identity<ITERATOR>::type     end,
-                   DoFInfo<dim, spacedim> &              dof_info,
-                   IntegrationInfoBox<dim, spacedim> &   box,
-                   const LocalIntegrator<dim, spacedim> &integrator,
-                   ASSEMBLER &                           assembler,
-                   const LoopControl &                   lctrl = LoopControl())
+  integration_loop(ITERATOR                                                   begin,
+                   typename identity<ITERATOR>::type                          end,
+                   DoFInfo<dim, spacedim, NUMBER, CELL, FACE> &               dof_info,
+                   IntegrationInfoBox<dim, spacedim> &                        box,
+                   const LocalIntegrator<dim, spacedim, NUMBER, CELL, FACE> & integrator,
+                   ASSEMBLER &                                                assembler,
+                   const LoopControl &                                        lctrl = LoopControl())
   {
-    std::function<void(DoFInfo<dim, spacedim> &,
+    std::function<void(DoFInfo<dim, spacedim, NUMBER, CELL, FACE> &,
                        IntegrationInfo<dim, spacedim> &)>
       cell_worker;
-    std::function<void(DoFInfo<dim, spacedim> &,
+    std::function<void(DoFInfo<dim, spacedim, NUMBER, CELL, FACE> &,
                        IntegrationInfo<dim, spacedim> &)>
       boundary_worker;
-    std::function<void(DoFInfo<dim, spacedim> &,
-                       DoFInfo<dim, spacedim> &,
+    std::function<void(DoFInfo<dim, spacedim, NUMBER, CELL, FACE> &,
+                       DoFInfo<dim, spacedim, NUMBER, CELL, FACE> &,
                        IntegrationInfo<dim, spacedim> &,
                        IntegrationInfo<dim, spacedim> &)>
       face_worker;
     if (integrator.use_cell)
-      cell_worker = std::bind(&LocalIntegrator<dim, spacedim>::cell,
+      cell_worker = std::bind(&LocalIntegrator<dim, spacedim, NUMBER, CELL, FACE>::cell,
                               &integrator,
                               std::placeholders::_1,
                               std::placeholders::_2);
     if (integrator.use_boundary)
-      boundary_worker = std::bind(&LocalIntegrator<dim, spacedim>::boundary,
+      boundary_worker = std::bind(&LocalIntegrator<dim, spacedim, NUMBER, CELL, FACE>::boundary,
                                   &integrator,
                                   std::placeholders::_1,
                                   std::placeholders::_2);
     if (integrator.use_face)
-      face_worker = std::bind(&LocalIntegrator<dim, spacedim>::face,
+      face_worker = std::bind(&LocalIntegrator<dim, spacedim, NUMBER, CELL, FACE>::face,
                               &integrator,
                               std::placeholders::_1,
                               std::placeholders::_2,

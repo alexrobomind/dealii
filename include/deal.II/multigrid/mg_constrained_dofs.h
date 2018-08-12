@@ -264,7 +264,7 @@ MGConstrainedDoFs::initialize(const DoFHandler<dim, spacedim> &dof)
       refinement_edge_indices[l] = IndexSet(dof.n_dofs(l));
     }
 
-  MGTools::extract_inner_interface_dofs(dof, refinement_edge_indices);
+  MGTools::extract_inner_or_periodic_interface_dofs(dof, refinement_edge_indices);
 }
 
 

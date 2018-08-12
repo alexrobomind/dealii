@@ -1629,6 +1629,104 @@ namespace MGTools
   }
 
 
+  template <int dim, int spacedim>
+  void
+  extract_inner_or_periodic_interface_dofs(const DoFHandler<dim, spacedim> &mg_dof_handler,
+                               std::vector<IndexSet> &          interface_dofs)
+  {
+    Assert(interface_dofs.size() ==
+             mg_dof_handler.get_triangulation().n_global_levels(),
+           ExcDimensionMismatch(
+             interface_dofs.size(),
+             mg_dof_handler.get_triangulation().n_global_levels()));
+
+    std::vector<std::vector<types::global_dof_index>> tmp_interface_dofs(
+      interface_dofs.size());
+
+    const FiniteElement<dim, spacedim> &fe = mg_dof_handler.get_fe();
+
+    const unsigned int dofs_per_cell = fe.dofs_per_cell;
+    const unsigned int dofs_per_face = fe.dofs_per_face;
+
+    std::vector<types::global_dof_index> local_dof_indices(dofs_per_cell);
+
+    std::vector<bool> cell_dofs(dofs_per_cell, false);
+
+    typename DoFHandler<dim>::cell_iterator cell = mg_dof_handler.begin(),
+                                            endc = mg_dof_handler.end();
+
+    for (; cell != endc; ++cell)
+      {
+        // Do not look at artificial level cells (in a serial computation we
+        // need to ignore the level_subdomain_id() because it is never set).
+        if (mg_dof_handler.get_triangulation().locally_owned_subdomain() !=
+              numbers::invalid_subdomain_id &&
+            cell->level_subdomain_id() == numbers::artificial_subdomain_id)
+          continue;
+
+        bool has_coarser_neighbor = false;
+
+        std::fill(cell_dofs.begin(), cell_dofs.end(), false);
+
+        for (unsigned int face_nr = 0;
+             face_nr < GeometryInfo<dim>::faces_per_cell;
+             ++face_nr)
+          {
+            const typename DoFHandler<dim, spacedim>::face_iterator face =
+              cell->face(face_nr);
+            if (!face->at_boundary() || cell->has_periodic_neighbor(face_nr))
+              {
+                // interior face
+                const typename DoFHandler<dim>::cell_iterator neighbor =
+                  cell->neighbor_or_periodic_neighbor(face_nr);
+
+                // only process cell pairs if one or both of them are owned by
+                // me (ignore if running in serial)
+                if (mg_dof_handler.get_triangulation()
+                        .locally_owned_subdomain() !=
+                      numbers::invalid_subdomain_id &&
+                    neighbor->level_subdomain_id() ==
+                      numbers::artificial_subdomain_id)
+                  continue;
+
+                // Do refinement face from the coarse side
+                if (neighbor->level() < cell->level())
+                  {
+                    for (unsigned int j = 0; j < dofs_per_face; ++j)
+                      cell_dofs[fe.face_to_cell_index(j, face_nr)] = true;
+
+                    has_coarser_neighbor = true;
+                  }
+              }
+          }
+
+        if (has_coarser_neighbor == false)
+          continue;
+
+        const unsigned int level = cell->level();
+        cell->get_mg_dof_indices(local_dof_indices);
+
+        for (unsigned int i = 0; i < dofs_per_cell; ++i)
+          {
+            if (cell_dofs[i])
+              tmp_interface_dofs[level].push_back(local_dof_indices[i]);
+          }
+      }
+
+    for (unsigned int l = 0;
+         l < mg_dof_handler.get_triangulation().n_global_levels();
+         ++l)
+      {
+        interface_dofs[l].clear();
+        std::sort(tmp_interface_dofs[l].begin(), tmp_interface_dofs[l].end());
+        interface_dofs[l].add_indices(tmp_interface_dofs[l].begin(),
+                                      std::unique(tmp_interface_dofs[l].begin(),
+                                                  tmp_interface_dofs[l].end()));
+        interface_dofs[l].compress();
+      }
+  }
+
+
 
   template <int dim, int spacedim>
   unsigned int

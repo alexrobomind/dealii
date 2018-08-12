@@ -131,6 +131,12 @@ for (deal_II_dimension : DIMENSIONS)
         const DoFHandler<deal_II_dimension> &mg_dof_handler,
         std::vector<IndexSet> &              interface_dofs);
 
+
+      template void
+      extract_inner_or_periodic_interface_dofs(
+        const DoFHandler<deal_II_dimension> &mg_dof_handler,
+        std::vector<IndexSet> &              interface_dofs);
+
       template void
       extract_non_interface_dofs(
         const DoFHandler<deal_II_dimension> &           mg_dof_handler,

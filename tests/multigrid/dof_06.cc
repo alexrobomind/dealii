@@ -23,13 +23,13 @@ print_face(const FaceType &face, unsigned int level)
     ExcMessage(
       "Please use a finite element with at least 1 DoF for this test"));
 
-  std::vector<types::global_dof_index> mg_dofs(face->get_fe(0).n_dofs_per_face());
+  std::vector<types::global_dof_index> mg_dofs(
+    face->get_fe(0).n_dofs_per_face());
   face->get_mg_dof_indices(level, mg_dofs);
 
   // Print face DoFs
   std::cout << mg_dofs[0];
-  for (unsigned int i_dof = 1; i_dof < mg_dofs.size();
-       ++i_dof)
+  for (unsigned int i_dof = 1; i_dof < mg_dofs.size(); ++i_dof)
     std::cout << ", " << mg_dofs[i_dof];
 }
 
@@ -88,14 +88,14 @@ check()
           // Iterate over all faces
           for (unsigned int i_face = 0; i_face < 2 * dim; ++i_face)
             {
-              if ((level_cell->at_boundary(i_face) && !level_cell -> has_periodic_neighbor(i_face)) ||
+              if ((level_cell->at_boundary(i_face) &&
+                   !level_cell->has_periodic_neighbor(i_face)) ||
                   level_cell->neighbor_or_periodic_neighbor(i_face)->level() ==
                     level_cell->level())
                 continue;
 
               // Get face
-              auto face =
-                level_cell->face(i_face);
+              auto face = level_cell->face(i_face);
 
               std::cout << "    ";
               print_face(face, level);
@@ -115,7 +115,7 @@ check()
 
       // Print faces that have periodic neighbors
       std::cout << "  Faces having periodic neighbors of same level:"
-              << std::endl;
+                << std::endl;
       for (typename DoFHandler<dim>::cell_iterator level_cell =
              dof_handler.begin(level);
            level_cell != dof_handler.end(level);

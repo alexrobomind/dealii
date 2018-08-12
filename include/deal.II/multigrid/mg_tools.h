@@ -259,8 +259,9 @@ namespace MGTools
    */
   template <int dim, int spacedim>
   void
-  extract_inner_or_periodic_interface_dofs(const DoFHandler<dim, spacedim> &mg_dof_handler,
-                               std::vector<IndexSet> &          interface_dofs);
+  extract_inner_or_periodic_interface_dofs(
+    const DoFHandler<dim, spacedim> &mg_dof_handler,
+    std::vector<IndexSet> &          interface_dofs);
 
   template <int dim, int spacedim>
   void
